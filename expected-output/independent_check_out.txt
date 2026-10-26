@@ -1,0 +1,67 @@
+n=2899  prevalence=0.707485  train n=2599 prev=0.731435  heldout n=300 prev=0.500000
+image feature matrix: (2899, 2048)
+
+--- EXPERIMENT A, model A, re-derived by independent code ---
+A age+sex -> held out pooled     n= 300 prev=0.5000 AUC=0.894711 meanPred=0.695627 O/E=0.718776 calInt=-1.324221 calSlp=1.310646 ECE=0.199464 Brier=0.188968
+   -> group 2                    n= 200 prev=0.5000 AUC=0.869000 meanPred=0.698028 O/E=0.716304 calInt=-1.326835 calSlp=1.128593 ECE=0.202372 Brier=0.202153
+      tie averaged ECE, 5000 orders: 0.202372 [0.202372, 0.202372]
+   -> group 3                    n= 100 prev=0.5000 AUC=0.945000 meanPred=0.690825 O/E=0.723772 calInt=-1.318760 calSlp=1.938304 ECE=0.202235 Brier=0.162598
+      tie averaged ECE, 5000 orders: 0.202235 [0.202235, 0.202235]
+
+--- fitted coefficients, standardised scale ---
+intercept +1.486983   age +1.715758   sex +0.283395
+
+--- EXPERIMENT C, corrections ---
+source prevalence 0.731435   target prevalence 0.500000   logit shift -1.001916
+(a) prior shift, deployable      n= 300 prev=0.5000 AUC=0.894711 meanPred=0.550548 O/E=0.908186 calInt=-0.322305 calSlp=1.310646 ECE=0.079939 Brier=0.136991
+(b) intercept refit, ceiling     n= 300 prev=0.5000 AUC=0.894711 meanPred=0.500000 O/E=1.000000 calInt=+0.000000 calSlp=1.310646 ECE=0.071022 Brier=0.132424
+
+--- HOW MUCH OF THE GAP DOES THE ONE NUMBER CLOSE ---
+ECE          raw 0.199464  prior-shift 0.079939  ceiling 0.071022  -> closes 93.1% of the gap
+Brier        raw 0.188968  prior-shift 0.136991  ceiling 0.132424  -> closes 91.9% of the gap
+|calInt|     raw 1.324221  prior-shift 0.322305  ceiling 0.000000  -> closes 75.7% of the gap
+|O/E - 1|    raw 0.281224  prior-shift 0.091814  ceiling 0.000000  -> closes 67.4% of the gap
+
+--- TIE AVERAGED ECE: 5000 random orders of tied predictions, seed 42 ---
+distinct prediction values in the 300 held out predictions: 101
+raw              mean 0.199880  sd 0.000680  [2.5%, 97.5%] [0.199464, 0.200991]
+prior shift      mean 0.084513  sd 0.004749  [2.5%, 97.5%] [0.073273, 0.091366]
+intercept refit  mean 0.074679  sd 0.003981  [2.5%, 97.5%] [0.064355, 0.077688]
+ECE gap closed by the prior shift, per order: mean 92.16%  [2.5%, 97.5%] [88.01%, 94.54%]
+
+--- DOES AUC MOVE. printed to 12 decimals ---
+raw          0.894711111111
+prior shift  0.894711111111
+refit        0.894711111111
+max abs difference from raw: 0.000e+00
+
+--- WHAT IS LEFT AFTER THE CEILING, AND WHAT IT IS MADE OF ---
+ceiling ECE 0.071022 with calibration slope 1.310646 (1.000 is perfect).
+(c) slope AND intercept refit    n= 300 prev=0.5000 AUC=0.894711 meanPred=0.500000 O/E=1.000000 calInt=+0.000000 calSlp=1.000000 ECE=0.054559 Brier=0.128782
+tie averaged ECE, 5000 orders: ceiling 0.074679, slope AND intercept refit 0.055497 [0.044948, 0.064948]
+So the residual after an intercept-only fix is a SLOPE problem: refitting the
+slope as well takes ECE 0.071022 -> 0.054559. An intercept correction cannot touch it.
+
+--- EXPERIMENT D, resampled to target prevalence, 2000 draws, seed 42 ---
+held out positives 150, negatives 150
+prev 0.0500  O/E 0.0936 [0.0885, 0.0991]  over-predicts 10.69 x  ECE 0.4848  after one-number fix O/E 0.9339
+prev 0.1000  O/E 0.1812 [0.1722, 0.1907]  over-predicts 5.52 x  ECE 0.4524  after one-number fix O/E 0.9089
+prev 0.2000  O/E 0.3399 [0.3242, 0.3561]  over-predicts 2.94 x  ECE 0.3888  after one-number fix O/E 0.8929
+prev 0.3000  O/E 0.4807 [0.4610, 0.5027]  over-predicts 2.08 x  ECE 0.3253  after one-number fix O/E 0.8934
+prev 0.5000  O/E 0.7194 [0.6949, 0.7461]  over-predicts 1.39 x  ECE 0.2028  after one-number fix O/E 0.9091
+prev 0.7314  O/E 0.9388 [0.9136, 0.9681]  over-predicts 1.07 x  ECE 0.0841  after one-number fix O/E 0.9388
+
+--- LABEL THRESHOLD, re-derived from data_info.json itself ---
+records 2903   keys per record ('True_age', 'age', 'gender', 'group', 'label', 'left_eye', 'right_eye', 'thickness')
+label == (thickness >= 0.9) mismatches: 0
+distinct thickness values: 15   range 0.50 to 1.70
+patients with thickness EXACTLY 0.9: 383 (13.19%), all label 1: True
+prevalence at the authors' 0.9 cut: 0.7075
+   if the cut were 0.8 mm instead: prevalence 0.8870  (+17.9 percentage points)
+   if the cut were 1.0 mm instead: prevalence 0.5753  (-13.2 percentage points)
+   if the cut were 1.1 mm instead: prevalence 0.4860  (-22.1 percentage points)
+mean age normal 36.71  thickened 52.58  gap 15.88 years
+pooled SD 10.72  Cohen d 1.48
+sex coding: female(0) n=1041, male(1) n=1862
+
+DONE

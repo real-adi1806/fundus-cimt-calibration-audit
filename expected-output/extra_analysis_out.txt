@@ -1,0 +1,51 @@
+==========================================================================================
+1. THE CLINICALLY LEGIBLE FORM OF THE OVER-PREDICTION
+==========================================================================================
+
+true prevalence 5%
+  mean risk the UNCORRECTED model announces : 53.5%  (truth 5.0%)
+  mean risk after the one-number prior shift: 5.4%
+  share of the population flagged at a 0.50 threshold: 57.4% uncorrected, 0.5% corrected
+  of those flagged, the share who truly have thickened CIMT: 8.4% uncorrected, 100.0% corrected
+
+true prevalence 10%
+  mean risk the UNCORRECTED model announces : 55.2%  (truth 10.0%)
+  mean risk after the one-number prior shift: 11.0%
+  share of the population flagged at a 0.50 threshold: 59.4% uncorrected, 2.3% corrected
+  of those flagged, the share who truly have thickened CIMT: 16.3% uncorrected, 100.0% corrected
+
+true prevalence 20%
+  mean risk the UNCORRECTED model announces : 58.9%  (truth 20.0%)
+  mean risk after the one-number prior shift: 22.4%
+  share of the population flagged at a 0.50 threshold: 63.7% uncorrected, 15.7% corrected
+  of those flagged, the share who truly have thickened CIMT: 30.4% uncorrected, 69.8% corrected
+
+==========================================================================================
+2. IS THE HELD-OUT SPLIT EASIER THAN THE SOURCE COHORT
+==========================================================================================
+AUC on the 300 held-out patients : 0.8947  95% CI [0.8555, 0.9272], width 0.0717
+Within-cohort out-of-fold AUC for the same covariates, from the baseline run: 0.8530
+The within-cohort figure sits just below this interval, but the two AUCs come
+from different populations and the out-of-fold estimate has its own
+uncertainty, so no claim is made that the held-out split is easier.
+
+calibration slope on held out : 1.3106  95% CI [1.0419, 1.7340]
+excludes 1.0 : True
+
+age distribution, which the balancing changed:
+  train group 1  n=2599 mean 48.11 sd 12.83  IQR 38.0 to 58.0  prevalence 0.7314
+  held out       n= 300 mean 46.57 sd 13.74  IQR 36.0 to 56.0  prevalence 0.5000
+  normals in train : mean age 36.46   normals in held out : mean age 37.77
+  cases   in train : mean age 52.38   cases   in held out : mean age 55.37
+
+==========================================================================================
+3. AUC AT EVERY STAGE, WITH INTERVALS, TO SHOW THE ZERO IS EXACT
+==========================================================================================
+raw                AUC 0.894711111111
+prior shift        AUC 0.894711111111
+intercept refit    AUC 0.894711111111
+pairwise max |difference| : 0.000e+00
+Both corrections are strictly increasing functions of the logit, so the patient
+ORDERING is untouched and any rank statistic is invariant by construction.
+
+DONE

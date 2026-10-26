@@ -1,0 +1,178 @@
+
+============================================================================================================
+DATA  [REAL]
+============================================================================================================
+patients            : 2899
+image feature dim   : 2048
+prevalence overall  : 0.7075
+age mean / sd       : 47.95 / 12.93
+female fraction     : 0.3587
+DEMOGRAPHIC COLUMNS PRESENT: age, sex. ETHNICITY: ABSENT. SKIN TONE: ABSENT.
+fundus luminance    : measured on 2899 of 2899 patients, median 118.5, IQR 100.5 to 133.5
+                      THIS IS A PROPERTY OF THE PHOTOGRAPH, NOT OF THE PERSON.
+
+============================================================================================================
+EXPERIMENT A.  TRAIN ON THE AUTHORS TRAIN SPLIT, DEPLOY ON THEIR HELD OUT SPLITS
+============================================================================================================
+The dataset ships a group column. Its three levels are not a random split:
+   group 1 : n=2599  prevalence=0.7314  mean age=48.11  female=0.352
+   group 2 : n= 200  prevalence=0.5000  mean age=46.67  female=0.440
+   group 3 : n= 100  prevalence=0.5000  mean age=46.35  female=0.370
+
+Train prevalence 0.7314. Held out prevalence 0.5000. That gap is the whole experiment.
+
+stratum                         n    prev     AUC meanPred     O/E   calInt  calSlp     ECE
+------------------------------------------------------------------------------------------------------------
+A age+sex -> group 2          200   0.500  0.8690    0.698   0.716   -1.327   1.129  0.2024
+                             90 distinct predictions of 200; tie averaged ECE 0.2024 [0.2024, 0.2024], 5000 orders
+A age+sex -> group 3          100   0.500  0.9450    0.691   0.724   -1.319   1.938  0.2022
+                             65 distinct predictions of 100; tie averaged ECE 0.2022 [0.2022, 0.2022], 5000 orders
+A age+sex -> held out POOL    300   0.500  0.8947    0.696   0.719   -1.324   1.311  0.1995
+                             O/E 95% CI [0.653, 0.782]   calInt 95% CI [-1.577, -1.061]   (C=1)
+                             101 distinct predictions of 300; tie averaged ECE 0.1999 [0.1995, 0.2010], 5000 orders
+B age+sex+image -> group 2    200   0.500  0.8738    0.698   0.716   -1.345   1.138  0.2022
+                             200 distinct predictions of 200; tie averaged ECE 0.2022 [0.2022, 0.2022], 5000 orders
+B age+sex+image -> group 3    100   0.500  0.9444    0.690   0.725   -1.309   1.909  0.2008
+                             100 distinct predictions of 100; tie averaged ECE 0.2008 [0.2008, 0.2008], 5000 orders
+B age+sex+image -> held ou    300   0.500  0.8985    0.695   0.719   -1.333   1.313  0.1991
+                             O/E 95% CI [0.654, 0.783]   calInt 95% CI [-1.585, -1.067]   (C=0.0001)
+                             300 distinct predictions of 300; tie averaged ECE 0.1991 [0.1991, 0.1991], 5000 orders
+B FULLY PENALISED (sens)      300   0.500  0.8327    0.713   0.702   -1.247   1.219  0.2126
+                             300 distinct predictions of 300; tie averaged ECE 0.2126 [0.2126, 0.2126], 5000 orders
+                             age and sex penalised like the images. C=0.001. This is the variant
+                             that would MISSTATE the images as harmful. It is the fit, not the data.
+
+============================================================================================================
+EXPERIMENT B.  OUT OF FOLD SUBGROUP AUDIT ON THE POOLED COHORT
+============================================================================================================
+5 fold stratified. Every patient is scored by a model that never saw them.
+This is the July pipeline step 2 and 3, on real data, on the axes that exist.
+
+--- model A age+sex   (whole cohort AUC 0.8535, O/E 1.000) ---
+stratum                         n    prev     AUC meanPred     O/E   calInt  calSlp     ECE
+------------------------------------------------------------------------------------------------------------
+sex = female                 1040   0.731  0.8480    0.731   0.999   -0.003   0.993  0.0323
+sex = male                   1859   0.694  0.8528    0.695   1.000   -0.001   1.008  0.0208
+------------------------------------------------------------------------------------------------------------
+age band = 40-49              596   0.688  0.6189    0.709   0.970   -0.104   0.882  0.0418
+age band = 50-59              961   0.899  0.6069    0.887   1.013    0.128   0.720  0.0236
+age band = 60+                519   0.971  0.6691    0.966   1.005    0.171   1.012  0.0162
+age band = <40                823   0.332  0.6758    0.334   0.992   -0.014   0.859  0.0477
+------------------------------------------------------------------------------------------------------------
+fundus luminance = T1 dark    982   0.740  0.8613    0.722   1.025    0.141   1.033  0.0230
+fundus luminance = T2 mid     970   0.668  0.8517    0.676   0.989   -0.052   1.011  0.0432
+fundus luminance = T3 ligh    947   0.714  0.8461    0.725   0.984   -0.088   0.967  0.0206
+------------------------------------------------------------------------------------------------------------
+
+--- model B age+sex+image   (whole cohort AUC 0.8560, O/E 1.000) ---
+stratum                         n    prev     AUC meanPred     O/E   calInt  calSlp     ECE
+------------------------------------------------------------------------------------------------------------
+sex = female                 1040   0.731  0.8510    0.732   0.999   -0.008   1.003  0.0260
+sex = male                   1859   0.694  0.8550    0.694   1.001    0.003   1.005  0.0182
+------------------------------------------------------------------------------------------------------------
+age band = 40-49              596   0.688  0.6306    0.707   0.973   -0.096   0.952  0.0517
+age band = 50-59              961   0.899  0.6208    0.888   1.012    0.118   0.740  0.0240
+age band = 60+                519   0.971  0.6889    0.966   1.005    0.158   1.091  0.0181
+age band = <40                823   0.332  0.6833    0.334   0.994   -0.010   0.879  0.0410
+------------------------------------------------------------------------------------------------------------
+fundus luminance = T1 dark    982   0.740  0.8656    0.730   1.014    0.083   1.018  0.0170
+fundus luminance = T2 mid     970   0.668  0.8533    0.670   0.997   -0.016   1.012  0.0363
+fundus luminance = T3 ligh    947   0.714  0.8473    0.722   0.988   -0.065   0.981  0.0161
+------------------------------------------------------------------------------------------------------------
+
+============================================================================================================
+EXPERIMENT C.  RECALIBRATION. DOES A SINGLE NUMBER FIX IT, AND AT WHAT COST
+============================================================================================================
+July pipeline step 3: recalibrate and show the ratio move toward 1.
+Two corrections, and the difference between them is what you can actually ship.
+  (a) PRIOR SHIFT: add logit(target prev) - logit(source prev). Needs only the
+      target PREVALENCE, which a deploying hospital knows. Deployable.
+  (b) INTERCEPT REFIT: fit the intercept on the target labels. Needs outcomes
+      from the target site. This is the ceiling, not a shippable method.
+
+                                        AUC      O/E   calInt      ECE
+----------------------------------------------------------------------
+A age+sex  raw                       0.8947    0.719   -1.324   0.1995
+A age+sex  (a) prior shift           0.8947    0.908   -0.322   0.0799
+A age+sex  (b) intercept refit       0.8947    1.000   -0.000   0.0710
+   applied logit shift for (a): -1.0019
+   distinct prediction values: 101 of 300
+   tie averaged ECE, 5000 random orders, raw                  mean 0.1999  [2.5%, 97.5%] [0.1995, 0.2010]
+   tie averaged ECE, 5000 random orders, (a) prior shift      mean 0.0845  [2.5%, 97.5%] [0.0733, 0.0914]
+   tie averaged ECE, 5000 random orders, (b) intercept refit  mean 0.0747  [2.5%, 97.5%] [0.0644, 0.0777]
+   ECE gap closed by prior shift, tie averaged: mean 92.2%  [2.5%, 97.5%] [88.0%, 94.5%]
+----------------------------------------------------------------------
+B age+sex+image  raw                 0.8985    0.719   -1.333   0.1991
+B age+sex+image  (a) prior shift     0.8985    0.907   -0.331   0.0801
+B age+sex+image  (b) intercept refit   0.8985    1.000   -0.000   0.0666
+   applied logit shift for (a): -1.0019
+   distinct prediction values: 300 of 300
+   tie averaged ECE, 5000 random orders, raw                  mean 0.1991  [2.5%, 97.5%] [0.1991, 0.1991]
+   tie averaged ECE, 5000 random orders, (a) prior shift      mean 0.0801  [2.5%, 97.5%] [0.0801, 0.0801]
+   tie averaged ECE, 5000 random orders, (b) intercept refit  mean 0.0666  [2.5%, 97.5%] [0.0666, 0.0666]
+   ECE gap closed by prior shift, tie averaged: mean 89.8%  [2.5%, 97.5%] [89.8%, 89.8%]
+----------------------------------------------------------------------
+
+============================================================================================================
+EXPERIMENT D.  WHAT HAPPENS AT SCREENING PREVALENCE
+============================================================================================================
+This cohort is INPATIENT ENDOCRINOLOGY. Inclusion was inpatients in the
+Department of Endocrinology who had both fundus imaging and carotid ultrasound.
+That is why 70.8 percent of them have thickened CIMT. A retinal camera used for
+SCREENING meets a far healthier population, so the shift at deployment is much
+larger than the 0.731 to 0.500 measured in experiment A.
+
+Method: resample the 300 held out patients to a target prevalence, with
+replacement, 2000 draws. This MEASURES the shift rather than assuming it.
+Held out positives and negatives available: 150 and 150.
+
+                                            O/E   O/E lo   O/E hi      ECE
+--------------------------------------------------------------------------
+target prevalence 0.05                    0.094    0.089    0.099   0.4848
+                                       over predicts by 10.69 x   after the one number prior shift fix: O/E 0.934
+target prevalence 0.10                    0.181    0.172    0.191   0.4524
+                                       over predicts by 5.52 x   after the one number prior shift fix: O/E 0.909
+target prevalence 0.20                    0.340    0.324    0.356   0.3888
+                                       over predicts by 2.94 x   after the one number prior shift fix: O/E 0.893
+target prevalence 0.30                    0.481    0.461    0.503   0.3253
+                                       over predicts by 2.08 x   after the one number prior shift fix: O/E 0.893
+target prevalence 0.50                    0.719    0.695    0.746   0.2028
+                                       over predicts by 1.39 x   after the one number prior shift fix: O/E 0.909
+target prevalence 0.73  (this cohort, train)    0.939    0.914    0.968   0.0841
+                                       over predicts by 1.07 x   after the one number prior shift fix: O/E 0.939
+--------------------------------------------------------------------------
+The uncorrected model is a risk INFLATOR, and the healthier the population the
+worse it gets. Nothing in an AUC would tell you that.
+
+THE ASSUMPTION IN THIS TABLE, AND IT IS A REAL LIMIT. Resampling changes the MIX
+of cases and controls. It cannot change what a case or a control LOOKS like. A
+real screening population has milder disease in its positives and healthier
+negatives than an endocrinology ward does, and this cannot capture that. So read
+these as the PREVALENCE COMPONENT of the deployment shift, isolated, not as a
+forecast of a screening study. The direction of the residual is not known and is
+not claimed. What is solid: the component that IS measured here is large, and one
+number removes most of it.
+
+============================================================================================================
+WHAT THIS DOES AND DOES NOT SHOW
+============================================================================================================
+DOES: whether discrimination and calibration come apart under the case mix
+      shift that is already built into this published benchmark, and whether
+      a one parameter correction closes the calibration gap.
+DOES NOT: anything about ethnicity or skin tone. There is no such column here.
+      The fundus luminance rows are a method check on an image property that is
+      confounded with camera exposure. They are not a fairness result.
+DOES NOT: predict cardiovascular events. The label is carotid wall thickness at
+      a 0.9 mm cut, which is a marker, not an outcome. 13.2 percent of patients
+      sit exactly on that cut.
+
+THE ONE LINE THAT CONNECTS THIS TO THE ETHNICITY QUESTION, and it is the dataset
+authors saying it, not us. They justify the 0.9 mm cut from a Chinese cohort and
+explicitly acknowledge THE VARIABILITY OF CIMT THRESHOLDS ACROSS ETHNICITIES AND
+AGE GROUPS. So on this task the ETHNICITY DEPENDENCE IS IN THE LABEL DEFINITION,
+before any model exists. Transport this model to a population with a different
+appropriate threshold and you have label shift on top of the prevalence shift
+measured above. That is the thing worth studying, and it needs a cohort with a
+recorded ethnicity column, which this one does not have.
+
+runtime 28.5 s   wrote out/calibration_audit_result.json

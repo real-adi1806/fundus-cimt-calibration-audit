@@ -1,0 +1,22 @@
+# data and anything derived from the images
+data/
+features/
+*.npy
+*.png
+*.zip
+# environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+# outputs written by a run
+out/
+baseline_oof_predictions.csv
+*.log
+baseline_output.txt
+image_test_output.txt
+image_test_result.json
+.DS_Store
+.env
+.env.*

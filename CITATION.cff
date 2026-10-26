@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it as below."
+title: "Calibration audit of the China-Fundus-CIMT benchmark: analysis code"
+type: software
+authors:
+  - family-names: "Krishnan"
+    given-names: "Adithya"
+version: "0.1.0"
+date-released: "2026-10-07"
+license: MIT
+abstract: "Code that reproduces the calibration audit of the public China-Fundus-CIMT dataset: age and sex versus frozen image features, and calibration under a prevalence shift. The dataset is not included."
