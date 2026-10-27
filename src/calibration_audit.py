@@ -181,6 +181,12 @@ def fundus_luminance(df):
     per_pat["patient_id"] = per_pat["patient_id"].astype(np.int64)
     merged = df[["patient_id"]].merge(per_pat, on="patient_id", how="left")
     assert len(merged) == len(df)
+    # Fail loudly rather than let a NaN fall silently into the tertile cut points.
+    assert np.isfinite(vals).all(), \
+        "%d of %d images have no luminance measurement" % ((~np.isfinite(vals)).sum(), len(vals))
+    assert np.isfinite(merged["lum"].values).all(), \
+        "%d of %d patients have no luminance measurement" % (
+            (~np.isfinite(merged["lum"].values)).sum(), len(merged))
     return merged["lum"].values
 
 

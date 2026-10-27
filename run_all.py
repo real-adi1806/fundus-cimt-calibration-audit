@@ -8,7 +8,8 @@ Runs the whole pipeline in order, stopping at the first failure:
   4. calibration     the paper's primary run (calibration_audit.py)
   5. independent     the separately written re-derivation
   6. extra           announced-risk table, slope interval, AUC invariance
-  7. figures         the paper's Figures 1 and 2 (make_figures.py)
+  7. csweep          model B at every ridge penalty C from 1e-6 to 100, with an ECE interval
+  8. figures         the paper's Figures 1 and 2 (make_figures.py)
 Optional, slow (595 seconds on an Apple M5 laptop on 23 Oct 2026; longer on
 older CPUs), not run by default:
   python src/image_test.py   the paired test of image features against age and sex
@@ -30,6 +31,7 @@ STEPS = [
     ("calibration", "calibration_audit.py"),
     ("independent", "independent_check.py"),
     ("extra", "extra_analysis.py"),
+    ("csweep", "c_sweep.py"),
     ("figures", "make_figures.py"),
 ]
 
